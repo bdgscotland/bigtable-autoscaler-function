@@ -1,0 +1,8 @@
+google-api-python-client
+google-cloud
+google-auth
+google-cloud-bigtable
+google-cloud-logging
+google-cloud-monitoring
+pyyaml
+
