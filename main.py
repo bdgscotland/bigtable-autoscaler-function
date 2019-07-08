@@ -38,12 +38,14 @@ def _load_data(request):
     
     bt_cluster = request_json['incident']['resource']['labels']['cluster']
     bt_instance = request_json['incident']['resource']['labels']['instance']
+    bt_incident_state = request_json['incident']['state']
 
     cluster = {
             "auth_token_yaml": yaml_data['auth_token'],
         	"auth_token_webhook": auth_token,
             "bt_cluster": bt_cluster,
             "bt_instance": bt_instance,
+        	"bt_incident_state": bt_incident_state,
             "min_node_count": yaml_data[bt_instance]['min_node_count'],
             "max_node_count": yaml_data[bt_instance]['max_node_count'] }
 
@@ -56,7 +58,7 @@ def client_handler(request):
     if not cluster['auth_token_webhook'] or not _check_token_auth(cluster['auth_token_yaml'], cluster['auth_token_webhook']):
         return ('403 Hoots min - Yir barred', 403)
     else:
-        logging.info("202 Token Accepted - Welcome to BTS")
+        logging.info("{} :: 202 Token Accepted - Welcome to BTS".format(datetime.datetime.now()))
         scaler(cluster)
         return ('OK', 202)
 
@@ -116,12 +118,13 @@ def scaler(cluster):
     global gcproject
     gcproject = os.environ['GCLOUD_PROJECT']
     
-    logging.info('{} Google Project {}'.format(datetime.datetime.now(), gcproject))
+    logging.info('{} :: Google Project {} : Triggered Cluster {}'.format(datetime.datetime.now(), gcproject,cluster['bt_cluster']))
     high_cpu_threshold = 0.8
     low_cpu_threshold = 0.5
     
     cluster_cpu = get_cpu(cluster)
     
+    #if cluster['bt_incident_state'] == 'open' | cluster['bt_incident_state'] == 'closed':
     if cluster_cpu > high_cpu_threshold:
         logging.info('{} :: Detected cpu of {}, higher than the configured threshold of {}. Attempting to scale up.'.format(datetime.datetime.now(), cluster_cpu, high_cpu_threshold))
         #print('I would have scaled up here')
@@ -130,7 +133,8 @@ def scaler(cluster):
         logging.info('{} :: Detected cpu of {}, lower than the configured threshold of {}. Attempting to scale down.'.format(datetime.datetime.now(), cluster_cpu, low_cpu_threshold))
         #print('I would have scaled down here')
         bt_scale(cluster, False)
-
+    #else:
+    #    logging.info('{} :: Stackdriver incident was {} - taking no action'.format(datetime.datetime.now(), cluster['bt_incident_state']))
 
 
 def main(request):
