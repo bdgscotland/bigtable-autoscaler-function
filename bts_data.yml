@@ -1,7 +1,0 @@
-auth_token: "imatoken"
-
-instancename:
-    high_cpu_threshold: 0.8
-    low_cpu_threshold: 0.5
-    max_node_count: 15
-    min_node_count: 3
