@@ -62,6 +62,8 @@ Then perform the following commands on the root folder:
 - `terraform apply` to apply the infrastructure build
 - `terraform destroy` to destroy the built infrastructure
 
+Due to a Terraform state bug, when you make a change to requirements/python (the actual function), you'll need to do a `terraform destroy` then `terraform apply` to pick up the change.
+
 
 ## Inputs
 
